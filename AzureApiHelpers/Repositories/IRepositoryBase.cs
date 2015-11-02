@@ -81,7 +81,7 @@ namespace AzureApiHelpers.Repositories
         /// <returns></returns>
         public virtual IQueryable<T> GetItems(Expression<Func<T, bool>> predicate, FeedOptions feedOptions = null)
         {
-            return _db.GetItems(predicate, feedOptions);
+            return _db.GetItems<T>(predicate, feedOptions);
         }
     }
 }

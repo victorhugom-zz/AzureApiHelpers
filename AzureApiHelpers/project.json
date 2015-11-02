@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.8",
   "description": "AzureApiHelpers Class Library",
   "authors": [ "victor hugo marques" ],
   "tags": [ "" ],
@@ -7,13 +7,13 @@
   "licenseUrl": "",
   "dependencies": {
     "ImageProcessor": "2.3.0",
-    "Microsoft.AspNet.Http.Abstractions": "1.0.0-beta7",
+    "Microsoft.AspNet.Http.Abstractions": "1.0.0-beta8",
     "Microsoft.Azure.DocumentDB": "1.5.0",
-    "Microsoft.Framework.Configuration": "1.0.0-beta7",
-    "Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta7",
-    "Microsoft.Framework.Configuration.Json": "1.0.0-beta7",
-    "Microsoft.Net.Http.Headers": "1.0.0-beta7",
-    "WindowsAzure.Storage": "6.0.0"
+    "Microsoft.Framework.Configuration": "1.0.0-beta8",
+    "Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
+    "Microsoft.Framework.Configuration.Json": "1.0.0-beta8",
+    "Microsoft.Net.Http.Headers": "1.0.0-beta8",
+    "WindowsAzure.Storage": "6.1.0"
   },
   "frameworks": {
     "dnx451": {
