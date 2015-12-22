@@ -18,9 +18,10 @@ namespace AzureApiHelpers
         private static string CollectionId;
         private static string OfferType;
         private static ICollection<Trigger> Triggers;
+        private static ICollection<StoredProcedure> StoredProcedures;
 
         //Reusable instance of DocumentClient which represents the connection to a DocumentDB endpoint
-        public DocumentDb(DbSettings dbSettings, ICollection<Trigger> triggers = null)
+        public DocumentDb(DbSettings dbSettings, ICollection<Trigger> triggers = null, ICollection<StoredProcedure> storedProcedures = null)
         {
             EndpointUrl = dbSettings.EndPointUrl;
             AuthorizationKey = dbSettings.AuthorizationKey;
@@ -28,6 +29,7 @@ namespace AzureApiHelpers
             CollectionId = dbSettings.CollectionId;
             OfferType = dbSettings.OfferType;
             Triggers = triggers;
+            StoredProcedures = storedProcedures;
         }
 
         //Use the Database if it exists, if not create a new Database
@@ -75,6 +77,7 @@ namespace AzureApiHelpers
                 {
                     database = ReadOrCreateDatabase();
                     CreateTriggers();
+                    CreateStoredProcedures();
                 }
 
                 return database;
@@ -127,6 +130,24 @@ namespace AzureApiHelpers
             }
         }
 
+        private async void CreateStoredProcedures()
+        {
+            if (StoredProcedures == null) return;
+
+            foreach (var storedProcedure in StoredProcedures)
+            {
+
+                var dbProcedure = Client.CreateStoredProcedureQuery(Collection.StoredProceduresLink)
+                            .Where(x => x.Id == storedProcedure.Id).AsEnumerable().FirstOrDefault();
+
+                if (dbProcedure == null)
+                {
+                    await Client.CreateStoredProcedureAsync(Collection.SelfLink, storedProcedure, new RequestOptions { });
+                }
+
+            }
+        }
+
         #region Queries
 
         public Document Get(string id, FeedOptions feedOptions = null)
@@ -158,6 +179,14 @@ namespace AzureApiHelpers
         {
             Document doc = Get(id);
             await Client.DeleteDocumentAsync(doc.SelfLink, requestOptions);
+        }
+
+        public Task<StoredProcedureResponse<T>> ExecuteStoredProcedure<T>(string storedProcedureId, dynamic[] storedProcedureParams) where T : class
+        {
+            var dbProcedure = Client.CreateStoredProcedureQuery(Collection.StoredProceduresLink)
+                           .Where(x => x.Id == storedProcedureId).AsEnumerable().FirstOrDefault();
+
+            return Client.ExecuteStoredProcedureAsync<T>(dbProcedure.SelfLink, storedProcedureParams);
         }
         #endregion
     }

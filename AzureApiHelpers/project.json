@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-rc1-final",
+  "version": "1.0.1-rc1",
   "description": "AzureApiHelpers Class Library",
   "authors": [ "victor hugo marques" ],
   "tags": [ "" ],
@@ -8,9 +8,9 @@
   "dependencies": {
     "ImageProcessor": "2.3.1",
     "Microsoft.AspNet.Http.Abstractions": "1.0.0-rc1-final",
-    "Microsoft.Azure.DocumentDB": "1.5.0",
+    "Microsoft.Azure.DocumentDB": "1.5.2",
     "Microsoft.Net.Http.Headers": "1.0.0-rc1-final",
-    "WindowsAzure.Storage": "6.1.0"
+    "WindowsAzure.Storage": "6.2.2-preview"
   },
   "frameworks": {
     "dnx451": {
