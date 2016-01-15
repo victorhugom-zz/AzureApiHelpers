@@ -69,7 +69,10 @@ namespace AzureApiHelpers
 
         //Use the ReadOrCreateDatabase function to get a reference to the database.
         private static Database database;
-        private Database Database
+        /// <summary>
+        /// Azure Api: Represents the database
+        /// </summary>
+        public Database Database
         {
             get
             {
@@ -86,7 +89,10 @@ namespace AzureApiHelpers
 
         //Use the ReadOrCreateCollection function to get a reference to the collection.
         private static DocumentCollection collection;
-        private DocumentCollection Collection
+        /// <summary>
+        /// Azure Api: Represents the document collection
+        /// </summary>
+        public DocumentCollection Collection
         {
             get
             {
@@ -100,7 +106,11 @@ namespace AzureApiHelpers
         }
 
         private static DocumentClient client;
-        private DocumentClient Client
+        /// <summary>
+        /// Provides a client-side logical representation of the Azure DocumentDB service.
+        /// This client is used to configure and execute requests against the service.
+        /// </summary>
+        public DocumentClient Client
         {
             get
             {

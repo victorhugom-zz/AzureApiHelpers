@@ -22,6 +22,8 @@ namespace AzureApiHelpers.Repositories
     {
         public DocumentDb _db;
 
+        public DocumentDb DocumentDb { get { return _db; } }
+
         public RepositoryBase(DocumentDb db)
         {
             _db = db;
