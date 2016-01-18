@@ -18,9 +18,10 @@ namespace AzureApiHelpers
     {
         private static string StorageAccountName;
         private static string StorageAccountAccessKey;
-        private static string[] AllowedExtensions = new string[] { ".jpg", ".png", ".gif" };
+        private static string[] AllowedExtensions = new string[] { ".jpg", ".png", ".gif", ".jpeg" };
         private static ISupportedImageFormat format = new JpegFormat { Quality = 100 };
         private static ResizeLayer ResizeLayer = new ResizeLayer(new Size(1920, 1080), ResizeMode.Min);
+        private static int ImageSizeInMb = 10;
 
         private CloudStorageAccount storageAccount;
         public CloudStorageAccount StorageAccount
@@ -69,28 +70,24 @@ namespace AzureApiHelpers
             }
         }
 
-        public async Task<string> UploadPhotoAsync(IFormFile photoToUpload)
+        /// <summary>
+        /// Upload a photo to the CDN
+        /// </summary>
+        /// <param name="photoToUpload"></param>
+        /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
+        /// <returns></returns>
+        public async Task<string> UploadPhotoAsync(Stream fileStream, string fileName = "")
         {
+            if (fileStream == null || fileStream.Length == 0)
+                return null;
+
+            fileName = string.IsNullOrEmpty(fileName) ? Guid.NewGuid().ToString() : fileName;
             string fullPath = null;
-
-            if (photoToUpload == null || photoToUpload.Length == 0)
-                return null;
-
-            var parsedContentDisposition = ContentDispositionHeaderValue.Parse(photoToUpload.ContentDisposition);
-            string filename = parsedContentDisposition.FileName.Trim('"');
-
-            //check extension
-            if (!FileExtensionIsValid(filename))
-                return null;
-
-            //check file size and upload
-            if (!FileSizeIsValid(photoToUpload))
-                return null;
 
             try
             {
                 // Create a unique name for the images we are about to upload
-                string imageName = $"photo-{Guid.NewGuid().ToString()}.jpg";
+                string imageName = $"photo-{fileName}.jpg";
 
                 // Upload image to Blob Storage
                 CloudBlockBlob blockBlob = Container.GetBlockBlobReference(imageName);
@@ -103,7 +100,7 @@ namespace AzureApiHelpers
                     using (ImageFactory imageFactory = new ImageFactory(preserveExifData: true))
                     {
                         // Load, resize, set the format and quality and save an image.
-                        imageFactory.Load(photoToUpload.OpenReadStream())
+                        imageFactory.Load(fileStream)
                                     .Resize(ResizeLayer)
                                     .Format(format)
                                     .AutoRotate()
@@ -127,6 +124,48 @@ namespace AzureApiHelpers
             return fullPath;
         }
 
+
+        /// <summary>
+        /// Upload a photo to the CDN
+        /// </summary>
+        /// <param name="photoToUpload"></param>
+        /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
+        /// <returns></returns>
+        public async Task<string> UploadPhotoAsync(IFormFile photoToUpload, string fileName = "")
+        {
+            if (photoToUpload == null || photoToUpload.Length == 0)
+                return null;
+
+            var parsedContentDisposition = ContentDispositionHeaderValue.Parse(photoToUpload.ContentDisposition);
+
+            //check file size and upload
+            if (!FileSizeIsValid(photoToUpload))
+                return null;
+
+            using (var photoStream = photoToUpload.OpenReadStream())
+            {
+                return await UploadPhotoAsync(photoStream, fileName);
+            }
+        }
+
+
+        /// <summary>
+        /// Upload a photo to the CDN
+        /// </summary>
+        /// <param name="photoToUpload"></param>
+        /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
+        /// <returns></returns>
+        public async Task<string> UploadPhotoAsync(string base64File, string fileName = "")
+        {
+            if (string.IsNullOrEmpty(base64File)) return null;
+
+            byte[] imageBytes = Convert.FromBase64String(base64File);
+            using (Stream fileStream = new MemoryStream(imageBytes))
+            {
+                return await UploadPhotoAsync(fileStream);
+            }
+        }
+
         private bool FileExtensionIsValid(string path)
         {
             return AllowedExtensions.Contains(Path.GetExtension(path));
@@ -135,14 +174,21 @@ namespace AzureApiHelpers
         private bool FileSizeIsValid(IFormFile file)
         {
             double fileSize = 0;
-            using (var reader = file.OpenReadStream())
-            {
-                //get filesize in kb
-                fileSize = (reader.Length / 1024);
-            }
+            //get filesize in kb
+            fileSize = (file.Length / 1024);
 
             //filesize less than 5MB => true, else => false
-            return (fileSize < 1024 * 5) ? true : false;
+            return (fileSize < 1024 * ImageSizeInMb) ? true : false;
+        }
+
+        private bool FileSizeIsValid(Stream streamFile)
+        {
+            double fileSize = 0;
+            //get filesize in kb
+            fileSize = (streamFile.Length / 1024);
+
+            //filesize less than 5MB => true, else => false
+            return (fileSize < 1024 * ImageSizeInMb) ? true : false;
         }
     }
 }
