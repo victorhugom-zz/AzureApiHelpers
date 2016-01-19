@@ -20,7 +20,7 @@ namespace AzureApiHelpers
         private static string StorageAccountAccessKey;
         private static string[] AllowedExtensions = new string[] { ".jpg", ".png", ".gif", ".jpeg" };
         private static ISupportedImageFormat format = new JpegFormat { Quality = 100 };
-        private static ResizeLayer ResizeLayer = new ResizeLayer(new Size(1920, 1080), ResizeMode.Min);
+        private ResizeLayer ResizeLayer = null;
         private static int ImageSizeInMb = 10;
 
         private CloudStorageAccount storageAccount;
@@ -45,6 +45,9 @@ namespace AzureApiHelpers
         {
             try
             {
+                if (appSettings.ImageSize != null)
+                    ResizeLayer = new ResizeLayer(new Size(1280, 720), ResizeMode.Min);
+
                 StorageAccountName = appSettings.StorageAccountName;
                 StorageAccountAccessKey = appSettings.StorageAccountAccessKey;
 
@@ -100,11 +103,16 @@ namespace AzureApiHelpers
                     using (ImageFactory imageFactory = new ImageFactory(preserveExifData: true))
                     {
                         // Load, resize, set the format and quality and save an image.
-                        imageFactory.Load(fileStream)
-                                    .Resize(ResizeLayer)
-                                    .Format(format)
-                                    .AutoRotate()
-                                    .Save(outStream);
+                        var imageToPrepare = imageFactory.Load(fileStream)
+                                        .Format(format)
+                                        .AutoRotate();
+
+                        // Resize image
+                        if (ResizeLayer != null)
+                            imageToPrepare.Resize(ResizeLayer);
+
+                        imageToPrepare.Save(outStream);
+
                     }
 
                     await blockBlob.UploadFromStreamAsync(outStream);

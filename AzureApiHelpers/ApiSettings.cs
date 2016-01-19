@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace AzureApiHelpers
 {
     public class DbSettings
@@ -13,6 +15,10 @@ namespace AzureApiHelpers
     {
         public string StorageAccountName { get; set; }
         public string StorageAccountAccessKey { get; set; }
+        /// <summary>
+        /// Used to resize the photo, if null the image will be note risized
+        /// </summary>
+        public Size ImageSize { get; set; }
     }
 
     public class AzureData
