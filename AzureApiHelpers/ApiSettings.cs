@@ -19,6 +19,11 @@ namespace AzureApiHelpers
         /// Used to resize the photo, if null the image will be note risized
         /// </summary>
         public Size ImageSize { get; set; }
+
+        /// <summary>
+        /// If true will upload a 100x100 thumbail in the container 'thumb'
+        /// </summary>
+        public bool UploadThumbnail { get; set; }
     }
 
     public class AzureData

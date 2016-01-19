@@ -22,6 +22,7 @@ namespace AzureApiHelpers
         private static ISupportedImageFormat format = new JpegFormat { Quality = 100 };
         private ResizeLayer ResizeLayer = null;
         private static int ImageSizeInMb = 10;
+        private bool UploadThumbnail = false;
 
         private CloudStorageAccount storageAccount;
         public CloudStorageAccount StorageAccount
@@ -48,6 +49,8 @@ namespace AzureApiHelpers
                 if (appSettings.ImageSize != null)
                     ResizeLayer = new ResizeLayer(appSettings.ImageSize, ResizeMode.Min);
 
+                UploadThumbnail = appSettings.UploadThumbnail;
+
                 StorageAccountName = appSettings.StorageAccountName;
                 StorageAccountAccessKey = appSettings.StorageAccountAccessKey;
 
@@ -66,6 +69,7 @@ namespace AzureApiHelpers
                                 BlobContainerPublicAccessType.Blob
                         });
                 }
+
             }
             catch (Exception ex)
             {
@@ -123,6 +127,7 @@ namespace AzureApiHelpers
                 uriBuilder.Scheme = "https";
                 fullPath = uriBuilder.ToString();
 
+                await UploadThumbnailToCDN(fileStream, imageName);
             }
             catch (Exception ex)
             {
@@ -130,6 +135,38 @@ namespace AzureApiHelpers
             }
 
             return fullPath;
+        }
+
+        private async Task UploadThumbnailToCDN(Stream fileStream, string imageName)
+        {
+            //set imageNameFolder
+            imageName = $"thumb/{imageName}";
+
+            // Upload image to Blob Storage
+            CloudBlockBlob blockBlob = Container.GetBlockBlobReference(imageName);
+            blockBlob.Properties.ContentType = "image/jpeg";
+
+            //resize image and up
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                // Initialize the ImageFactory using the overload to preserve EXIF metadata.
+                using (ImageFactory imageFactory = new ImageFactory(preserveExifData: true))
+                {
+                    // Load, resize, set the format and quality and save an image.
+                    var imageToPrepare = imageFactory.Load(fileStream)
+                                    .Format(format)
+                                    .Resize(new ResizeLayer(resizeMode: ResizeMode.Min, size: new Size(100, 100)))
+                                    .AutoRotate();
+
+                    // Resize image
+                    if (ResizeLayer != null)
+                        imageToPrepare.Resize(ResizeLayer);
+
+                    imageToPrepare.Save(outStream);
+                }
+
+                await blockBlob.UploadFromStreamAsync(outStream);
+            }
         }
 
 
