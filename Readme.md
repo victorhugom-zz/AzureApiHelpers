@@ -1,4 +1,4 @@
-#This project is not done yet, be carrefull
+#This project is not done yet, be carefull
 
 #How to Use
 
