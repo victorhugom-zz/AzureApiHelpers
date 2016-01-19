@@ -46,7 +46,7 @@ namespace AzureApiHelpers
             try
             {
                 if (appSettings.ImageSize != null)
-                    ResizeLayer = new ResizeLayer(new Size(1280, 720), ResizeMode.Min);
+                    ResizeLayer = new ResizeLayer(appSettings.ImageSize, ResizeMode.Min);
 
                 StorageAccountName = appSettings.StorageAccountName;
                 StorageAccountAccessKey = appSettings.StorageAccountAccessKey;
