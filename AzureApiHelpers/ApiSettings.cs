@@ -11,8 +11,13 @@ namespace AzureApiHelpers
         public string OfferType { get; set; }
     }
 
-    public class CDNSettings
+    public class BlobSettings
     {
+        public BlobSettings()
+        {
+            ContainerName = "images";
+        }
+
         public string StorageAccountName { get; set; }
         public string StorageAccountAccessKey { get; set; }
         /// <summary>
@@ -24,11 +29,31 @@ namespace AzureApiHelpers
         /// If true will upload a 100x100 thumbail in the container 'thumb'
         /// </summary>
         public bool UploadThumbnail { get; set; }
+
+        /// <summary>
+        /// Default container name: images
+        /// </summary>
+        public string ContainerName { get; set; }
+    }
+
+    public class BusQueueSettings
+    {
+        public BusQueueSettings()
+        {
+            QueueName = "default";
+        }
+
+        public string ConnectionString { get;  set; }
+        /// <summary>
+        ///Default queue name: default
+        /// </summary>
+        public string QueueName { get; set; }
     }
 
     public class AzureData
     {
         public DbSettings DbSettings { get; set; }
-        public CDNSettings CDNSettings { get; set; }
+        public BlobSettings BlobSettings { get; set; }
+        public BusQueueSettings BusQueueSettings { get; set; }
     }
 }

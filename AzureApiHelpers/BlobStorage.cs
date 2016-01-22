@@ -14,7 +14,7 @@ using System.Drawing;
 
 namespace AzureApiHelpers
 {
-    public class CDN
+    public class BlobStorage
     {
         private static string StorageAccountName;
         private static string StorageAccountAccessKey;
@@ -42,7 +42,7 @@ namespace AzureApiHelpers
         public CloudBlobClient BlobClient { get; private set; }
         public CloudBlobContainer Container { get; private set; }
 
-        public CDN(CDNSettings appSettings)
+        public BlobStorage(BlobSettings appSettings)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace AzureApiHelpers
 
                 // Create a blob client and retrieve reference to images container
                 BlobClient = StorageAccount.CreateCloudBlobClient();
-                Container = BlobClient.GetContainerReference("images");
+                Container = BlobClient.GetContainerReference(appSettings.ContainerName);
 
                 // Create the "images" container if it doesn't already exist.
                 if (Container.CreateIfNotExists())
@@ -78,7 +78,7 @@ namespace AzureApiHelpers
         }
 
         /// <summary>
-        /// Upload a photo to the CDN
+        /// Upload a photo to the Blob azure storage service
         /// </summary>
         /// <param name="photoToUpload"></param>
         /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
@@ -127,7 +127,7 @@ namespace AzureApiHelpers
                 uriBuilder.Scheme = "https";
                 fullPath = uriBuilder.ToString();
 
-                await UploadThumbnailToCDN(fileStream, imageName);
+                await UploadThumbnailToBlob(fileStream, imageName);
             }
             catch (Exception ex)
             {
@@ -137,7 +137,7 @@ namespace AzureApiHelpers
             return fullPath;
         }
 
-        private async Task UploadThumbnailToCDN(Stream fileStream, string imageName)
+        private async Task UploadThumbnailToBlob(Stream fileStream, string imageName)
         {
             //set imageNameFolder
             imageName = $"thumb/{imageName}";
@@ -169,9 +169,8 @@ namespace AzureApiHelpers
             }
         }
 
-
         /// <summary>
-        /// Upload a photo to the CDN
+        /// Upload a photo to the Azure Blob Storage Service
         /// </summary>
         /// <param name="photoToUpload"></param>
         /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
@@ -193,9 +192,8 @@ namespace AzureApiHelpers
             }
         }
 
-
         /// <summary>
-        /// Upload a photo to the CDN
+        /// Upload a photo to the Azure Blob Storage Service
         /// </summary>
         /// <param name="photoToUpload"></param>
         /// <param name="fileName">Optional. Will use a random GUID if no filename defined</param>
