@@ -160,8 +160,23 @@ namespace AzureApiHelpers
 
         #region Queries
 
-        public Document Get(string id, FeedOptions feedOptions = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="feedOptions"></param>
+        /// <param name="partitionKey">If you are using a partitioned db you need to pass this</param>
+        /// <returns></returns>
+        public Document Get(string id, FeedOptions feedOptions = null, string partitionKey = null)
         {
+            if (!string.IsNullOrEmpty(partitionKey))
+            {
+                if (feedOptions == null)
+                    feedOptions = new FeedOptions();
+
+                feedOptions.PartitionKey = new PartitionKey(partitionKey);
+            }
+
             return Client.CreateDocumentQuery(Collection.DocumentsLink, feedOptions)
                 .Where(d => d.Id == id)
                 .AsEnumerable()
@@ -179,24 +194,45 @@ namespace AzureApiHelpers
             return await Client.CreateDocumentAsync(Collection.SelfLink, item, requestOptions);
         }
 
-        public async Task<Document> UpdateItemAsync<T>(string id, T item, RequestOptions requestOptions = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="item"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="partitionKey">If you are using a partitioned db you need to pass this</param>
+        /// <returns></returns>
+        public async Task<Document> UpdateItemAsync<T>(string id, T item, RequestOptions requestOptions = null, string partitionKey = null)
         {
-            Document doc = Get(id);
+            Document doc = Get(id, partitionKey: partitionKey);
             return await Client.ReplaceDocumentAsync(doc.SelfLink, item, requestOptions);
         }
 
-        public async Task DeleteItem(string id, RequestOptions requestOptions = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="partitionKey">If you are using a partitioned db you need to pass this</param>
+        /// <returns></returns>
+        public async Task DeleteItem(string id, RequestOptions requestOptions = null, string partitionKey = null)
         {
-            Document doc = Get(id);
+            Document doc = Get(id, partitionKey: partitionKey);
             await Client.DeleteDocumentAsync(doc.SelfLink, requestOptions);
         }
 
-        public Task<StoredProcedureResponse<T>> ExecuteStoredProcedure<T>(string storedProcedureId, dynamic[] storedProcedureParams) where T : class
+        public Task<StoredProcedureResponse<T>> ExecuteStoredProcedure<T>(string storedProcedureId, dynamic[] storedProcedureParams, string partitionKey = null) where T : class
         {
+            RequestOptions resquestOptions = null;
+            if (!string.IsNullOrEmpty(partitionKey))
+                resquestOptions = new RequestOptions() { PartitionKey = new PartitionKey(partitionKey) };
+
             var dbProcedure = Client.CreateStoredProcedureQuery(Collection.StoredProceduresLink)
                            .Where(x => x.Id == storedProcedureId).AsEnumerable().FirstOrDefault();
 
-            return Client.ExecuteStoredProcedureAsync<T>(dbProcedure.SelfLink, storedProcedureParams);
+            var uri = UriFactory.CreateStoredProcedureUri(database.Id,collection.Id, storedProcedureId);
+            return Client.ExecuteStoredProcedureAsync<T>(uri, resquestOptions, storedProcedureParams);
         }
         #endregion
     }
