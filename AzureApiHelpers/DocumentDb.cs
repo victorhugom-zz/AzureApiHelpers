@@ -105,7 +105,7 @@ namespace AzureApiHelpers
             }
         }
 
-        private static DocumentClient client;
+        private DocumentClient client;
         /// <summary>
         /// Provides a client-side logical representation of the Azure DocumentDB service.
         /// This client is used to configure and execute requests against the service.
@@ -218,6 +218,11 @@ namespace AzureApiHelpers
         /// <returns></returns>
         public async Task DeleteItem(string id, RequestOptions requestOptions = null, string partitionKey = null)
         {
+            if (requestOptions == null)
+                requestOptions = new RequestOptions();
+
+            requestOptions.PartitionKey = new PartitionKey(partitionKey);
+
             Document doc = Get(id, partitionKey: partitionKey);
             await Client.DeleteDocumentAsync(doc.SelfLink, requestOptions);
         }
