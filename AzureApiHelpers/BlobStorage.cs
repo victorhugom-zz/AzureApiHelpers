@@ -205,7 +205,7 @@ namespace AzureApiHelpers
             byte[] imageBytes = Convert.FromBase64String(base64File);
             using (Stream fileStream = new MemoryStream(imageBytes))
             {
-                return await UploadPhotoAsync(fileStream);
+                return await UploadPhotoAsync(fileStream, fileName);
             }
         }
 
