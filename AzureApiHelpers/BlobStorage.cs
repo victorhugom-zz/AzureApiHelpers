@@ -8,9 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using Microsoft.AspNet.Http;
-using Microsoft.Net.Http.Headers;
 using System.Drawing;
+using Microsoft.AspNet.Http;
+using System.Net.Http.Headers;
 
 namespace AzureApiHelpers
 {
@@ -33,7 +33,7 @@ namespace AzureApiHelpers
                 {
                     string account = StorageAccountName;
                     string key = StorageAccountAccessKey;
-                    string connectionString = String.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", account, key);
+                    string connectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", account, key);
                     storageAccount = CloudStorageAccount.Parse(connectionString);
                 }
                 return storageAccount;
